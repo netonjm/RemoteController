@@ -5,10 +5,4 @@
         Server,
         Client
     }
-
-    public enum ClientConnectionType
-    {
-        Remote,
-        Local
-    }
 }

@@ -7,10 +7,10 @@ namespace KeyRead
 {
     public class KeyPressedSocketBehaviour : WebSocketBehavior
     {
-        KeyService keyManager;
-        public KeyPressedSocketBehaviour(KeyService keyManager)
+        IGameService gameService;
+        public KeyPressedSocketBehaviour(IGameService keyManager)
         {
-            this.keyManager = keyManager;
+            this.gameService = keyManager;
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -28,25 +28,7 @@ namespace KeyRead
                     var rest = e.Data.Substring("GAME|".Length);
                     if (int.TryParse (rest, out var gameNumber))
                     {
-                        if (gameNumber == 0)
-                        {
-                            if (!(keyManager.CurrentGame is VPPlayerGame))
-                            {
-                                keyManager.CurrentGame = new VPPlayerGame();
-
-                            }
-                        } 
-                        else if (gameNumber == 1)
-                        {
-                            if (!(keyManager.CurrentGame is VPPlayerGame))
-                            {
-                                keyManager.CurrentGame = new VPPlayerGame();
-                            }
-                        } 
-                        else
-                        {
-
-                        }
+                        gameService.SetCurrentGame(gameNumber);
                     }
                 }
                 catch (Exception ex)
@@ -62,7 +44,7 @@ namespace KeyRead
 
                 if (Enum.TryParse(split[0], out KeyEvent keyEvent) && Enum.TryParse(split[1], out Keys myStatus))
                 {
-                    keyManager.SendKey(keyEvent, myStatus);
+                    gameService.SendKey(keyEvent, myStatus);
                 } 
             }
             catch (Exception)

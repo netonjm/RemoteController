@@ -9,7 +9,7 @@ namespace KeyRead
 {
     public partial class Form1 : Form
     {
-        KeyService keyService;
+        WinFormsGameService keyService;
 
         const int Port = 8089;
 
@@ -19,7 +19,7 @@ namespace KeyRead
         {
             InitializeComponent();
 
-            keyService = new KeyService();
+            keyService = new WinFormsGameService();
 
             keyService.GameChanged += (s, e) =>
             {
