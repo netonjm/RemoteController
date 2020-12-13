@@ -1,4 +1,4 @@
-﻿namespace KeyRead
+﻿namespace RemoteController.Server
 {
     partial class Form1
     {

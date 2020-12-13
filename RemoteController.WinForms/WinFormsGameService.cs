@@ -1,9 +1,10 @@
 ﻿using RemoteController;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace KeyRead
+namespace RemoteController.Server
 {
     public class NativeKeyboardHelper
     {
@@ -44,6 +45,7 @@ namespace KeyRead
                 GameChanged?.Invoke(this, EventArgs.Empty);
             }
         }
+
         IntPtr GetWindowIntPtr() => NativeKeyboardHelper.FindWindow("VPPlayer", "Visual Pinball Player");
 
         public void SendKey(KeyEvent ev, RemoteController.Keys v)
@@ -81,10 +83,17 @@ namespace KeyRead
                     CurrentGame = new VPPlayerGame();
                 }
             }
-            else
-            {
+        }
 
-            }
+        Process p;
+
+        public void StartCurrentGame()
+        {
+            p = new Process();
+            p.StartInfo.FileName = System.IO.Path.GetFileName(CurrentGame.ExecutableFilePath);
+            p.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(CurrentGame.ExecutableFilePath);
+            p.Start();
+            p.WaitForInputIdle();
         }
     }
 }

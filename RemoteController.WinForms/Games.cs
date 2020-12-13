@@ -1,6 +1,6 @@
 ﻿using RemoteController;
 
-namespace KeyRead
+namespace RemoteController.Server
 {
     public class VPPlayerGame : WindowsGame
     {

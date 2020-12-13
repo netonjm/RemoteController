@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace RemoteController.Client
 {
-    class WinFormsTimer : ITimer
+    public class WinFormsTimer : ITimer
     {
         readonly Timer timer;
         public WinFormsTimer ()

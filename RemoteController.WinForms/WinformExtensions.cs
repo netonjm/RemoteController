@@ -1,4 +1,4 @@
-﻿namespace KeyRead
+﻿namespace RemoteController.Server
 {
     public static class WinformExtensions
     {

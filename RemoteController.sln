@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController.Server", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController.Core", "RemoteController.Core\RemoteController.Core.csproj", "{CF73F757-B311-46F9-9548-DE03068E2FF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController.WinForms", "RemoteController.WinForms\RemoteController.WinForms.csproj", "{0009BC31-3579-49AE-80AA-D70DCA105143}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0009BC31-3579-49AE-80AA-D70DCA105143}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0009BC31-3579-49AE-80AA-D70DCA105143}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0009BC31-3579-49AE-80AA-D70DCA105143}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0009BC31-3579-49AE-80AA-D70DCA105143}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

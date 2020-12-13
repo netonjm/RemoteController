@@ -1,9 +1,8 @@
-﻿using RemoteController;
-using System;
+﻿using System;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
-namespace KeyRead
+namespace RemoteController
 {
     public class KeyPressedSocketBehaviour : WebSocketBehavior
     {
