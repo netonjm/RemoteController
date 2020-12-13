@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController.Client", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController.Server", "RemoteController.Server\RemoteController.Server.csproj", "{BB6AE56B-20AF-4FF4-B07A-3E3EFD129BC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController.Core", "RemoteController.Core\RemoteController.Core.csproj", "{CF73F757-B311-46F9-9548-DE03068E2FF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BB6AE56B-20AF-4FF4-B07A-3E3EFD129BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB6AE56B-20AF-4FF4-B07A-3E3EFD129BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB6AE56B-20AF-4FF4-B07A-3E3EFD129BC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF73F757-B311-46F9-9548-DE03068E2FF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

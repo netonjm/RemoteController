@@ -1,12 +1,15 @@
-﻿using System;
+﻿using RemoteController;
+using System;
 using System.Windows.Forms;
 
 namespace KeyRead
 {
-    public enum KeyEvent
+    public static class WinformExtensions
     {
-        Down,
-        Up
+        public static System.Windows.Forms.Keys ToWinformsKey (this RemoteController.Keys keys)
+        {
+            return (System.Windows.Forms.Keys)(int)keys;
+        }
     }
 
     public abstract class Game
@@ -52,7 +55,7 @@ namespace KeyRead
         }
         IntPtr GetWindowIntPtr() => NativeKeyboardHelper.FindWindow("VPPlayer", "Visual Pinball Player");
 
-        public void SendKey(KeyEvent ev, Keys v)
+        public void SendKey(KeyEvent ev, RemoteController.Keys v)
         {
             //msg = {msg=0x100 (WM_KEYDOWN) hwnd=0x380fb2 wparam=0x28 lparam=0x1500001 result=0x0}
 
@@ -64,10 +67,10 @@ namespace KeyRead
             //PostMessage(notepad, WM_KEYDOWN, (int)Keys.D5, 0);
 
             if (ev == KeyEvent.Up)
-                InputManager.Keyboard.KeyUp(v);
+                InputManager.Keyboard.KeyUp(v.ToWinformsKey ());
 
             if (ev == KeyEvent.Down)
-                InputManager.Keyboard.KeyDown(v);
+                InputManager.Keyboard.KeyDown(v.ToWinformsKey());
         }
     }
 }

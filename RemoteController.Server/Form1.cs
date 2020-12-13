@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RemoteController;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -59,8 +60,8 @@ namespace KeyRead
       
         private void button2_Click(object sender, EventArgs e)
         {
-            keyService.SendKey(KeyEvent.Down, Keys.D5);
-            keyService.SendKey(KeyEvent.Up, Keys.D5);
+            keyService.SendKey(KeyEvent.Down, RemoteController.Keys.D5);
+            keyService.SendKey(KeyEvent.Up, RemoteController.Keys.D5);
         }
 
         private void btnGame1_Click(object sender, EventArgs e)

@@ -101,5 +101,11 @@
     <None Include="Resources\electronics.ico" />
     <None Include="Resources\connect.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RemoteController.Core\RemoteController.Core.csproj">
+      <Project>{cf73f757-b311-46f9-9548-de03068e2ff8}</Project>
+      <Name>RemoteController.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

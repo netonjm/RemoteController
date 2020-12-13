@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RemoteController;
+using System;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -59,7 +60,7 @@ namespace KeyRead
             {
                 var split = e.Data.Split('|');
 
-                if (Enum.TryParse(split[0], out KeyEvent keyEvent) && Enum.TryParse(split[1], out System.Windows.Forms.Keys myStatus))
+                if (Enum.TryParse(split[0], out KeyEvent keyEvent) && Enum.TryParse(split[1], out Keys myStatus))
                 {
                     keyManager.SendKey(keyEvent, myStatus);
                 } 

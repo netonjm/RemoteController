@@ -1,165 +1,146 @@
-﻿using SlimDX.DirectInput;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-using WebSocketSharp;
 
 namespace RemoteController.Client
 {
- 
+
     public partial class Form1 : Form
     {
-        const int Port = 8089;
-        const string IpAddress = "10.67.1.57";
+        ClientMapperService clientMapperService;
 
-        List<JoyButton> joyButtons = new List<JoyButton>();
-        Joystick gamepad;
-        JoystickState state = new JoystickState();
+        //ITimerWrapper timer = new Timer();
+        const int DefaultDelayTooltips = 1000;
 
-        Timer timer = new Timer();
+        Configuration configuration;
+        MapperConfiguration mapperConfiguration;
 
-        WebSocket ws;
+        public string ApplicationName { get; set; } = "Simple Device Mapper";
+        public string ApplicationVersion { get; set; } = "0.2";
+
+        bool HasInit = false;
 
         public Form1()
         {
             InitializeComponent();
-            timer.Tick += new EventHandler(TimerEventProcessor);
+            //timer.Tick += new EventHandler(TimerEventProcessor);
 
-            Visible = false;
-
+            Visible = true;
+            Text = ApplicationName + " v" + ApplicationVersion;
             notifyIcon1.Visible = true;
-            notifyIcon1.Text = "GameProxy";
-            notifyIcon1.ShowBalloonTip(1000, "Connection", $"Trying to connect to {IpAddress}:{Port}", ToolTipIcon.Info);
+            notifyIcon1.Text = ApplicationName;
 
-            CreateDevice();
+            var joyButtons = new System.Collections.Generic.List<JoyButton>();
+            //TODO: mapear a configuracion .json
+            joyButtons.Add(new JoyButton(0, Keys.N)); //
+            joyButtons.Add(new JoyButton(1, Keys.I)); //bola
+            joyButtons.Add(new JoyButton(2, Keys.Space));
+            joyButtons.Add(new JoyButton(3, Keys.M));
 
-            ws = new WebSocket($"ws://{IpAddress}:{Port}/Laputa");
-            ws.OnMessage += (sender, e) =>
+            joyButtons.Add(new JoyButton(4, Keys.U)); //left
+            joyButtons.Add(new JoyButton(5, Keys.P)); //right
+
+            joyButtons.Add(new JoyButton(6, Keys.D1)); //start
+            joyButtons.Add(new JoyButton(7, Keys.D6)); //coin
+
+            //lectura de json
+            this.configuration = new Configuration()
             {
-                if (e.Data == "PONG")
-                {
-                    
-                    Console.WriteLine("SERVER CONNECTED SUCCESSFULL");
-                    notifyIcon1.ShowBalloonTip(1000, "Connection", $"Connection to {IpAddress}:{Port} successfull.", ToolTipIcon.Info);
-                    notifyIcon1.Icon = RemoteController.Client.Properties.Resources.electronics;
-                    notifyIcon1.Text = "GameProxy (Connected)";
-                }
-                else
-                    Console.WriteLine("Laputa says: " + e.Data);
+                Connection = new ClientMapperConfiguration() { 
+                    IpAddress = "10.67.1.57", Port = 8089, JoyButtons = joyButtons, ClientConnectionType = ClientConnectionType.Remote }
             };
 
-            joyButtons.Add(new JoyButton(ws, 0, Keys.N)); //
-            joyButtons.Add(new JoyButton(ws, 1, Keys.I)); //sacar bola
-            joyButtons.Add(new JoyButton(ws, 2, Keys.Space));
-            joyButtons.Add(new JoyButton(ws, 3, Keys.M));
+            mapperConfiguration = this.configuration.Connection;
 
-            joyButtons.Add(new JoyButton(ws, 4, Keys.U)); //left
-            joyButtons.Add(new JoyButton(ws, 5, Keys.P)); //right
+            //Initial values
+            ClientMapperConfiguration clientMapperConfiguration = null;
 
-            joyButtons.Add(new JoyButton(ws, 6, Keys.D1)); //start
-            joyButtons.Add(new JoyButton(ws, 7, Keys.D6)); //coin
-         
-            //trying to connect
-            try
+            if (configuration.Connection is ClientMapperConfiguration clientConfiguration)
+                clientMapperConfiguration = clientConfiguration;
+            mapeadoRemotoIpTextBox.Text = clientMapperConfiguration.IpAddress.ToString();
+
+            var deviceService = new SlimDXDeviceService();
+
+            clientMapperService = new ClientMapperService(clientMapperConfiguration, new WinFormsTimer (), deviceService);
+            clientMapperService.Connected += (s, e) =>
             {
-                ws.Connect();
-                ws.Send("PING");
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("SERVER CONNECTION FAILED");
-                notifyIcon1.ShowBalloonTip(1000, "Connection", $"Connection to {IpAddress}:{Port} failed.", ToolTipIcon.Error);
-                notifyIcon1.Icon = RemoteController.Client.Properties.Resources.high_priority;
-                notifyIcon1.Text = "GameProxy (Not Connected)";
-            }
-        }
-
-        protected override void SetVisibleCore(bool value)
-        {
-            base.SetVisibleCore(false);
-        }
-
-        bool CreateDevice()
-        {
-            // make sure that DirectInput has been initialized
-            DirectInput dinput = new DirectInput();
-
-            // search for devices
-            foreach (DeviceInstance device in dinput.GetDevices(DeviceClass.GameController, DeviceEnumerationFlags.AttachedOnly))
-            {
-                // create the device
-                try
+                if (clientMapperService.LastException != null)
                 {
-                    gamepad = new Joystick(dinput, device.InstanceGuid);
-                    //gamepad.SetCooperativeLevel(this, CooperativeLevel.Exclusive | CooperativeLevel.Foreground);
-                    if (gamepad.Acquire().IsFailure)
-                    {
-                        notifyIcon1.ShowBalloonTip(1000, "Joystick", $"Adquire() is failing to initialize.", ToolTipIcon.Error);
-                        notifyIcon1.Icon = RemoteController.Client.Properties.Resources.high_priority;
-                        notifyIcon1.Text = "GameProxy (Disconnected)";
-                        return false;
-                    }
-
-                    break;
+                    notifyIcon1.ShowBalloonTip(DefaultDelayTooltips, "Connection", $"Connection to {clientMapperService.IpAddress}:{clientMapperService.Port} failed.", ToolTipIcon.Error);
+                    notifyIcon1.Icon = Properties.Resources.high_priority;
+                    notifyIcon1.Text = $"{clientMapperService.IpAddress} (Not Connected)";
                 }
-                catch (DirectInputException ex)
+                else
                 {
-                    Console.WriteLine(ex);
+                    notifyIcon1.ShowBalloonTip(DefaultDelayTooltips, "Connection", $"Connection to {clientMapperService.IpAddress}:{clientMapperService.Port} successfull.", ToolTipIcon.Info);
+                    notifyIcon1.Icon = Properties.Resources.electronics;
+                    notifyIcon1.Text = $"{clientMapperService.IpAddress} (Connected)";
                 }
-            }
+            };
 
-            if (gamepad == null)
+            clientMapperService.Connecting += (s, e) =>
+             {
+                 notifyIcon1.ShowBalloonTip(1000, "Connection", $"Trying to connect to {clientMapperService.IpAddress}:{clientMapperService.Port}", ToolTipIcon.Info);
+             };
+
+            mapeadoRemotoIpTextBox.TextChanged += (s, e) =>
             {
-                notifyIcon1.ShowBalloonTip(1000, "No USB Joystick", $"There are no joysticks attached to the system.", ToolTipIcon.Error);
-                notifyIcon1.Icon = RemoteController.Client.Properties.Resources.high_priority;
-                notifyIcon1.Text = "GameProxy (No USB controller)";
-                return false;
-            }
+                if (mapperConfiguration is ClientMapperConfiguration c)
+                    c.IpAddress = mapeadoRemotoIpTextBox.Text;
+            };
 
-            timer.Interval = 1000 / 12;
-            timer.Start();
-            return true;
-        }
+            clientMapperService.Initialize();
 
-        private void TimerEventProcessor(object sender, EventArgs e)
-        {
-            ReadImmediateData();
-        }
+            //states recovering
 
-        void ReadImmediateData()
-        {
-            if (gamepad.Poll().IsFailure)
-                return;
-            if (SlimDX.Result.Last.IsFailure)
-                return;
-
-            state = gamepad.GetCurrentState();
-
-            var buttons = state.GetButtons();
-            for (int i = 0; i < joyButtons.Count; i++)
+            if (mapperConfiguration is ClientMapperConfiguration clientMapper)
             {
-                joyButtons[i].Pressed = buttons[i];
+                if (clientMapper.ClientConnectionType == ClientConnectionType.Remote)
+                { 
+                    mapeadoLocalRadioButton.Checked = true;
+                }
+
+                mapeadoRemotoIpTextBox.Text = clientMapper.IpAddress;
+                conServerRadioButton.Checked = false;
+                conClientRadioButton.Checked = true;
             }
-        }
-
-        void ReleaseDevice()
-        {
-            //timer.Stop();
-
-            if (gamepad != null)
+            else
             {
-                gamepad.Unacquire();
-                gamepad.Dispose();
+                conServerRadioButton.Checked = true;
+                conClientRadioButton.Checked = false;
             }
-            gamepad = null;
+          
+            RefreshStates();
+
+            //prueba de conexión
+            mapeadoRemotoConnectButton.Click += (s, e) => clientMapperService.Start();
+
+            HasInit = true;
         }
 
+        void RefreshStates ()
+        {
+            mapeadoClienteGroupBox.Enabled = !conServerRadioButton.Checked;
+            mapeadoRemotoIpTextBox.Enabled = mapeadoRemotoConnectButton.Enabled = mapeadoRemotoRadioButton.Checked;
+        }
+
+        //protected override void SetVisibleCore(bool value)
+        //{
+        //    base.SetVisibleCore(false);
+        //}
+
+     
         protected override void OnClosing(CancelEventArgs e)
         {
-            ReleaseDevice();
+            clientMapperService.Dispose();
             base.OnClosing(e);
+        }
+
+        private void conServerRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (HasInit)
+                RefreshStates();
         }
     }
 }
