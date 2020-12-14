@@ -3,6 +3,7 @@
     public enum ClientConnectionType
     {
         Remote,
-        Local
+        Local, 
+        Standalone
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
@@ -8,13 +9,11 @@ namespace RemoteController.Client
 
     public partial class Form1 : Form
     {
-        ClientMapperService clientMapperService;
-
         //ITimerWrapper timer = new Timer();
         const int DefaultDelayTooltips = 1000;
 
         Configuration configuration;
-        MapperConfiguration mapperConfiguration;
+        MapperConfiguration mapperConfiguration => configuration.Connection;
 
         public string ApplicationName { get; set; } = "Simple Device Mapper";
         public string ApplicationVersion { get; set; } = "0.2";
@@ -45,13 +44,43 @@ namespace RemoteController.Client
             joyButtons.Add(new JoyButton(7, Keys.D6)); //coin
 
             //lectura de json
-            this.configuration = new Configuration()
-            {
-                Connection = new ClientMapperConfiguration() { 
-                    IpAddress = "10.67.1.57", Port = 8089, JoyButtons = joyButtons, ClientConnectionType = ClientConnectionType.Remote }
-            };
+            this.configuration = new Configuration();
+            configuration.ConnectionChanged += Configuration_ConnectionChanged;
 
-            mapperConfiguration = this.configuration.Connection;
+            configuration.Connection = new ClientMapperConfiguration()
+            {
+                IpAddress = "10.67.1.57",
+                Port = 8089,
+                JoyButtons = joyButtons
+            };
+         
+            HasInit = true;
+        }
+
+        private void Configuration_ConnectionChanged(object sender, EventArgs ev)
+        {
+            if (configuration.Connection is ClientMapperConfiguration)
+                RefreshClientConfiguration();
+            else if (configuration.Connection is ServerMapperConnection)
+                RefreshServerConfiguration();
+            else
+                RefreshStandaloneConfiguration();
+
+            RefreshStates();
+        }
+
+        void RefreshStandaloneConfiguration()
+        {
+
+        }
+
+        void RefreshServerConfiguration()
+        {
+
+        }
+
+        void RefreshClientConfiguration ()
+        {
 
             //Initial values
             ClientMapperConfiguration clientMapperConfiguration = null;
@@ -62,7 +91,13 @@ namespace RemoteController.Client
 
             var deviceService = new SlimDXDeviceService();
 
-            clientMapperService = new ClientMapperService(clientMapperConfiguration, new WinFormsTimer (), deviceService);
+            var clientMapperService = new ClientMapperService(clientMapperConfiguration, new WinFormsTimer(), deviceService);
+
+            if (mapperConfiguration is ClientMapperConfiguration clientMapper)
+            {
+                mapeadoRemotoIpTextBox.Text = clientMapper.IpAddress;
+            }
+
             clientMapperService.Connected += (s, e) =>
             {
                 if (clientMapperService.LastException != null)
@@ -80,49 +115,48 @@ namespace RemoteController.Client
             };
 
             clientMapperService.Connecting += (s, e) =>
-             {
-                 notifyIcon1.ShowBalloonTip(1000, "Connection", $"Trying to connect to {clientMapperService.IpAddress}:{clientMapperService.Port}", ToolTipIcon.Info);
-             };
+            {
+                notifyIcon1.ShowBalloonTip(1000, "Connection", $"Trying to connect to {clientMapperService.IpAddress}:{clientMapperService.Port}", ToolTipIcon.Info);
+            };
 
             mapeadoRemotoIpTextBox.TextChanged += (s, e) =>
             {
                 if (mapperConfiguration is ClientMapperConfiguration c)
                     c.IpAddress = mapeadoRemotoIpTextBox.Text;
             };
-
-            clientMapperService.Initialize();
-
-            //states recovering
-
-            if (mapperConfiguration is ClientMapperConfiguration clientMapper)
-            {
-                if (clientMapper.ClientConnectionType == ClientConnectionType.Remote)
-                { 
-                    mapeadoLocalRadioButton.Checked = true;
-                }
-
-                mapeadoRemotoIpTextBox.Text = clientMapper.IpAddress;
-                conServerRadioButton.Checked = false;
-                conClientRadioButton.Checked = true;
-            }
-            else
-            {
-                conServerRadioButton.Checked = true;
-                conClientRadioButton.Checked = false;
-            }
-          
-            RefreshStates();
-
-            //prueba de conexión
             mapeadoRemotoConnectButton.Click += (s, e) => clientMapperService.Start();
 
-            HasInit = true;
+            clientMapperService.Initialize();
         }
 
         void RefreshStates ()
         {
             mapeadoClienteGroupBox.Enabled = !conServerRadioButton.Checked;
-            mapeadoRemotoIpTextBox.Enabled = mapeadoRemotoConnectButton.Enabled = mapeadoRemotoRadioButton.Checked;
+
+            if (mapperConfiguration is ClientMapperConfiguration clientMapper)
+            {
+                mapeadoRemotoIpTextBox.Text = clientMapper.IpAddress;
+                conServerRadioButton.Checked = false;
+                conClientRadioButton.Checked = true;
+                conStandaloneRadioButton.Checked = false;
+                mapeadoRemotoIpTextBox.Enabled = mapeadoRemotoConnectButton.Enabled = true;
+            }
+            else if (mapperConfiguration is ServerMapperConnection)
+            {
+                conServerRadioButton.Checked = true;
+                conClientRadioButton.Checked = false;
+                conStandaloneRadioButton.Checked = false;
+
+                mapeadoRemotoIpTextBox.Enabled = mapeadoRemotoConnectButton.Enabled = false;
+            }
+            else if (mapperConfiguration is StandaloneMapperConnection)
+            {
+                conServerRadioButton.Checked = false;
+                conClientRadioButton.Checked = false;
+                conStandaloneRadioButton.Checked = true;
+
+                mapeadoRemotoIpTextBox.Enabled = mapeadoRemotoConnectButton.Enabled = false;
+            }
         }
 
         //protected override void SetVisibleCore(bool value)
@@ -133,14 +167,36 @@ namespace RemoteController.Client
      
         protected override void OnClosing(CancelEventArgs e)
         {
-            clientMapperService.Dispose();
             base.OnClosing(e);
         }
 
         private void conServerRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            if (HasInit)
-                RefreshStates();
+            if (!conServerRadioButton.Checked)
+                return;
+            configuration.Connection = new ServerMapperConnection()
+            {
+                IpAddress = "10.67.1.57",
+                Port = 8089,
+            };
+        }
+
+        private void conStandaloneRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!conStandaloneRadioButton.Checked)
+                return;
+            configuration.Connection = new StandaloneMapperConnection();
+        }
+
+        private void conClientRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!conClientRadioButton.Checked)
+                return;
+            configuration.Connection = new ClientMapperConfiguration()
+            {
+                IpAddress = "10.67.1.57",
+                Port = 8089,
+            };
         }
     }
 }

@@ -3,6 +3,7 @@
     public enum ConnectionType
     {
         Server,
-        Client
+        Client,
+        Standalone
     }
 }

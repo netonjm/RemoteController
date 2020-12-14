@@ -5,7 +5,6 @@ namespace RemoteController.Client
 {
     public class SlimDXDeviceService : IDeviceService
     {
-        public bool IsLastFailure => SlimDX.Result.Last.IsFailure;
         Joystick gamepad;
         JoystickState state = new JoystickState();
 
